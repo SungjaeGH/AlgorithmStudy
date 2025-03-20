@@ -1,61 +1,112 @@
-import java.io.*;
-import java.util.StringTokenizer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 public class Main {
-    static int wormCount = 0;
-    static int[][] move = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; // 상하좌우
+    public static void main(String[] args) throws IOException {
 
-    // dfs
-    static void dfs(int currRow, int currCol, boolean[][] map, boolean[][] visited) {
-        visited[currRow][currCol] = true;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        for (int idx = 0; idx < 4; idx++) {
-            int nextRow = currRow + move[idx][0];
-            int nextCol = currCol + move[idx][1];
+        int testcaseCount = Integer.parseInt(br.readLine());
+        List<Integer> results = new LinkedList<>();
 
-            if (nextRow < 0 || nextRow >= map.length || nextCol < 0 || nextCol >= map[0].length) {
-                continue;
-            }
+        for (int testcaseIdx = 0; testcaseIdx < testcaseCount; testcaseIdx++) {
 
-            if (map[nextRow][nextCol] && !visited[nextRow][nextCol]) {
-                dfs(nextRow, nextCol, map, visited);
-            }
+            String[] mapInfo = br.readLine().split(" ");
+            int maxRow = Integer.parseInt(mapInfo[0]);
+            int maxCol = Integer.parseInt(mapInfo[1]);
+            int maxItem = Integer.parseInt(mapInfo[2]);
+
+            int[][] map = setMap(maxRow, maxCol, maxItem, br);
+
+            results.add(countMinEarthworms(map));
         }
+
+        results.forEach(System.out::println);
     }
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+    private static int[][] setMap(
+            int maxRow,
+            int maxCol,
+            int maxItem,
+            BufferedReader br
+    ) throws IOException {
 
-        int testCaseCount = Integer.parseInt(bufferedReader.readLine());
-        for (int testCaseIdx = 0; testCaseIdx < testCaseCount; testCaseIdx++) {
-            StringTokenizer st = new StringTokenizer(bufferedReader.readLine(), " ");
-            int maxWidth = Integer.parseInt(st.nextToken());
-            int maxHeight = Integer.parseInt(st.nextToken());
-            int cabbageCount = Integer.parseInt(st.nextToken());
+        int[][] map = new int[maxRow][maxCol];
 
-            boolean[][] visited = new boolean[maxWidth][maxHeight];
-            boolean[][] map = new boolean[maxWidth][maxHeight];
+        for (int idx = 0; idx < maxItem; idx++) {
 
-            for (int cabbageIdx = 0; cabbageIdx < cabbageCount; cabbageIdx++) {
-                StringTokenizer locationSt = new StringTokenizer(bufferedReader.readLine(), " ");
-                int width = Integer.parseInt(locationSt.nextToken());
-                int height = Integer.parseInt(locationSt.nextToken());
+            String[] inputs = br.readLine().split(" ");
+            int row = Integer.parseInt(inputs[0]);
+            int col = Integer.parseInt(inputs[1]);
 
-                map[width][height] = true;
-            }
-
-            for (int row = 0; row < maxWidth; row++) {
-                for (int col = 0; col < maxHeight; col++) {
-                    if (map[row][col] && !visited[row][col]) {
-                        dfs(row, col, map, visited);
-
-                        wormCount++;
-                    }
-                }
-            }
-
-            System.out.println(wormCount);
-            wormCount = 0;
+            map[row][col] = 1;
         }
+
+        return map;
+    }
+
+    private static int countMinEarthworms(int[][] map) {
+
+        int[][] move = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int maxRow = map.length;
+        int maxCol = map[0].length;
+
+        Queue<int[]> queue = new LinkedList<>();
+        boolean[][] visited = new boolean[maxRow][maxCol];
+        int count = 0;
+
+        for (int row = 0; row < maxRow; row++) {
+            for (int col = 0; col < maxCol; col++) {
+
+                if (visited[row][col]) {
+                    continue;
+                }
+
+                if (map[row][col] != 1) {
+                    visited[row][col] = true;
+                    continue;
+                }
+
+                queue.offer(new int[]{row, col});
+                visited[row][col] = true;
+
+                while (!queue.isEmpty()) {
+
+                    int[] curr = queue.poll();
+
+                    for (int idx = 0; idx < 4; idx++) {
+
+                        int nextRow = curr[0] + move[idx][0];
+                        int nextCol = curr[1] + move[idx][1];
+
+                        if (nextRow < 0 || nextRow >= maxRow || nextCol < 0 || nextCol >= maxCol) {
+                            continue;
+                        }
+
+                        if (visited[nextRow][nextCol]) {
+                            continue;
+                        }
+
+                        visited[nextRow][nextCol] = true;
+
+                        if (map[nextRow][nextCol] != 1) {
+                            continue;
+                        }
+
+                        queue.offer(new int[]{nextRow, nextCol});
+                    }
+
+                }
+
+                count++;
+            }
+
+        }
+
+        return count;
     }
 }
