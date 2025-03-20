@@ -21,8 +21,28 @@ public class Main {
             int maxItem = Integer.parseInt(mapInfo[2]);
 
             int[][] map = setMap(maxRow, maxCol, maxItem, br);
+            boolean[][] visited = new boolean[maxRow][maxCol];
+            int count = 0;
 
-            results.add(countMinEarthworms(map));
+            for (int row = 0; row < maxRow; row++) {
+                for (int col = 0; col < maxCol; col++) {
+
+                    if (visited[row][col]) {
+                        continue;
+                    }
+
+                    visited[row][col] = true;
+
+                    if (map[row][col] != 1) {
+                        continue;
+                    }
+
+                    checkEarthwormsSection(row, col, map, visited);
+                    count++;
+                }
+            }
+
+            results.add(count);
         }
 
         results.forEach(System.out::println);
@@ -49,64 +69,45 @@ public class Main {
         return map;
     }
 
-    private static int countMinEarthworms(int[][] map) {
+    private static void checkEarthwormsSection(
+            int row,
+            int col,
+            int[][] map,
+            boolean[][] visited
+    ) {
 
         int[][] move = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         int maxRow = map.length;
         int maxCol = map[0].length;
 
         Queue<int[]> queue = new LinkedList<>();
-        boolean[][] visited = new boolean[maxRow][maxCol];
-        int count = 0;
+        queue.offer(new int[]{row, col});
 
-        for (int row = 0; row < maxRow; row++) {
-            for (int col = 0; col < maxCol; col++) {
+        while (!queue.isEmpty()) {
 
-                if (visited[row][col]) {
+            int[] curr = queue.poll();
+
+            for (int idx = 0; idx < 4; idx++) {
+
+                int nextRow = curr[0] + move[idx][0];
+                int nextCol = curr[1] + move[idx][1];
+
+                if (nextRow < 0 || nextRow >= maxRow || nextCol < 0 || nextCol >= maxCol) {
                     continue;
                 }
 
-                if (map[row][col] != 1) {
-                    visited[row][col] = true;
+                if (visited[nextRow][nextCol]) {
                     continue;
                 }
 
-                queue.offer(new int[]{row, col});
-                visited[row][col] = true;
+                visited[nextRow][nextCol] = true;
 
-                while (!queue.isEmpty()) {
-
-                    int[] curr = queue.poll();
-
-                    for (int idx = 0; idx < 4; idx++) {
-
-                        int nextRow = curr[0] + move[idx][0];
-                        int nextCol = curr[1] + move[idx][1];
-
-                        if (nextRow < 0 || nextRow >= maxRow || nextCol < 0 || nextCol >= maxCol) {
-                            continue;
-                        }
-
-                        if (visited[nextRow][nextCol]) {
-                            continue;
-                        }
-
-                        visited[nextRow][nextCol] = true;
-
-                        if (map[nextRow][nextCol] != 1) {
-                            continue;
-                        }
-
-                        queue.offer(new int[]{nextRow, nextCol});
-                    }
-
+                if (map[nextRow][nextCol] != 1) {
+                    continue;
                 }
 
-                count++;
+                queue.offer(new int[]{nextRow, nextCol});
             }
-
         }
-
-        return count;
     }
 }
