@@ -1,47 +1,32 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.StringTokenizer;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        Scanner sc = new Scanner(System.in);
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        int N = sc.nextInt();
-
-        sc.nextLine();
-
-        StringTokenizer st = new StringTokenizer(sc.nextLine(), " ");
-        ArrayList<Integer> times = new ArrayList<>();
+        int inputCount = Integer.parseInt(br.readLine());
+        ArrayList<Integer> list = new ArrayList<>();
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
         while (st.hasMoreTokens()) {
-            times.add(Integer.parseInt(st.nextToken()));
+            list.add(Integer.parseInt(st.nextToken()));
         }
 
-        for (int i = 1; i < N; i++) {
+        Collections.sort(list);
 
-            int targetTime = times.get(i);
-            int insertIdx = i;
+        int[] sums = new int[inputCount + 1];
 
-            for (int j = i - 1; j >= 0; j--) {
-
-                if (targetTime < times.get(j)) {
-                    insertIdx = j;
-                }
-            }
-
-            times.remove(i);
-            times.add(insertIdx, targetTime);
+        for (int idx = 1; idx <= inputCount; idx++) {
+            sums[idx] = sums[idx - 1] + list.get(idx - 1);
         }
 
-        int sum = 0, lastTime = 0;
-
-        for (int time : times) {
-            lastTime += time;
-            sum += lastTime;
-        }
-
-        System.out.println(sum);
-
+        System.out.println(Arrays.stream(sums).sum());
     }
 }
